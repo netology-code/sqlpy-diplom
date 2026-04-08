@@ -1,129 +1,219 @@
+"""
+EnglishCard - Приложение для изучения английского языка
+Базовый файл-заготовка для курсовой работы
+Студенту необходимо доработать этот файл в соответствии с заданием
+"""
+
+import streamlit as st
+import psycopg2
+import pandas as pd
 import random
 
-from telebot import types, TeleBot, custom_filters
-from telebot.storage import StateMemoryStorage
-from telebot.handler_backends import State, StatesGroup
+# ============================================================
+# НАСТРОЙКА СТРАНИЦЫ
+# ============================================================
+st.set_page_config(
+    page_title="EnglishCard - Изучение английского",
+    page_icon="📚",
+    layout="wide"
+)
 
 
-print('Start telegram bot...')
+# ============================================================
+# РАБОТА С БАЗОЙ ДАННЫХ (НЕОБХОДИМО РЕАЛИЗОВАТЬ)
+# ============================================================
 
-state_storage = StateMemoryStorage()
-token_bot = ''
-bot = TeleBot(token_bot, state_storage=state_storage)
-
-known_users = []
-userStep = {}
-buttons = []
-
-
-def show_hint(*lines):
-    return '\n'.join(lines)
-
-
-def show_target(data):
-    return f"{data['target_word']} -> {data['translate_word']}"
+def get_db_connection():
+    """
+    TODO: Реализовать подключение к PostgreSQL
+    Параметры подключения:
+    - host: localhost
+    - database: english_card
+    - user: postgres
+    - password: postgres
+    """
+    pass
 
 
-class Command:
-    ADD_WORD = 'Добавить слово ➕'
-    DELETE_WORD = 'Удалить слово🔙'
-    NEXT = 'Дальше ⏭'
+def init_database():
+    """
+    TODO: Реализовать создание таблиц, если они не существуют
+    Необходимые таблицы:
+    1. users (id, username, created_at)
+    2. common_words (id, russian_word, english_word, created_at)
+    3. user_words (id, user_id, russian_word, english_word, created_at)
+    4. learning_stats (id, user_id, word_id, word_type, correct_answers, total_attempts, last_reviewed)
+    
+    Также заполнить common_words начальными словами (минимум 10 слов)
+    """
+    pass
 
 
-class MyStates(StatesGroup):
-    target_word = State()
-    translate_word = State()
-    another_words = State()
+def login_user(username):
+    """
+    TODO: Реализовать вход пользователя
+    Если пользователь существует - вернуть его id
+    Если нет - создать нового и вернуть его id
+    """
+    pass
 
 
-def get_user_step(uid):
-    if uid in userStep:
-        return userStep[uid]
-    else:
-        known_users.append(uid)
-        userStep[uid] = 0
-        print("New user detected, who hasn't used \"/start\" yet")
-        return 0
+def get_user_words(user_id):
+    """
+    TODO: Получить все слова пользователя (общие + персональные)
+    Возвращает список словарей: [{'id': 1, 'russian_word': 'красный', 'english_word': 'red', 'word_type': 'common'}, ...]
+    """
+    pass
 
 
-@bot.message_handler(commands=['cards', 'start'])
-def create_cards(message):
-    cid = message.chat.id
-    if cid not in known_users:
-        known_users.append(cid)
-        userStep[cid] = 0
-        bot.send_message(cid, "Hello, stranger, let study English...")
-    markup = types.ReplyKeyboardMarkup(row_width=2)
-
-    global buttons
-    buttons = []
-    target_word = 'Peace'  # брать из БД
-    translate = 'Мир'  # брать из БД
-    target_word_btn = types.KeyboardButton(target_word)
-    buttons.append(target_word_btn)
-    others = ['Green', 'White', 'Hello', 'Car']  # брать из БД
-    other_words_btns = [types.KeyboardButton(word) for word in others]
-    buttons.extend(other_words_btns)
-    random.shuffle(buttons)
-    next_btn = types.KeyboardButton(Command.NEXT)
-    add_word_btn = types.KeyboardButton(Command.ADD_WORD)
-    delete_word_btn = types.KeyboardButton(Command.DELETE_WORD)
-    buttons.extend([next_btn, add_word_btn, delete_word_btn])
-
-    markup.add(*buttons)
-
-    greeting = f"Выбери перевод слова:\n🇷🇺 {translate}"
-    bot.send_message(message.chat.id, greeting, reply_markup=markup)
-    bot.set_state(message.from_user.id, MyStates.target_word, message.chat.id)
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        data['target_word'] = target_word
-        data['translate_word'] = translate
-        data['other_words'] = others
+def add_personal_word(user_id, russian_word, english_word):
+    """
+    TODO: Добавить персональное слово для пользователя
+    Проверить, нет ли уже такого слова
+    Возвращает True/False
+    """
+    pass
 
 
-@bot.message_handler(func=lambda message: message.text == Command.NEXT)
-def next_cards(message):
-    create_cards(message)
+def delete_personal_word(user_id, word_id):
+    """
+    TODO: Удалить персональное слово пользователя
+    Возвращает True/False
+    """
+    pass
 
 
-@bot.message_handler(func=lambda message: message.text == Command.DELETE_WORD)
-def delete_word(message):
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        print(data['target_word'])  # удалить из БД
+def update_stats(user_id, word_id, word_type, is_correct):
+    """
+    TODO: Обновить статистику изучения слова
+    """
+    pass
 
 
-@bot.message_handler(func=lambda message: message.text == Command.ADD_WORD)
-def add_word(message):
-    cid = message.chat.id
-    userStep[cid] = 1
-    print(message.text)  # сохранить в БД
+def get_statistics(user_id):
+    """
+    TODO: Получить статистику пользователя
+    Возвращает словарь со статистикой
+    """
+    pass
 
 
-@bot.message_handler(func=lambda message: True, content_types=['text'])
-def message_reply(message):
-    text = message.text
-    markup = types.ReplyKeyboardMarkup(row_width=2)
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        target_word = data['target_word']
-        if text == target_word:
-            hint = show_target(data)
-            hint_text = ["Отлично!❤", hint]
-            next_btn = types.KeyboardButton(Command.NEXT)
-            add_word_btn = types.KeyboardButton(Command.ADD_WORD)
-            delete_word_btn = types.KeyboardButton(Command.DELETE_WORD)
-            buttons.extend([next_btn, add_word_btn, delete_word_btn])
-            hint = show_hint(*hint_text)
-        else:
-            for btn in buttons:
-                if btn.text == text:
-                    btn.text = text + '❌'
-                    break
-            hint = show_hint("Допущена ошибка!",
-                             f"Попробуй ещё раз вспомнить слово 🇷🇺{data['translate_word']}")
-    markup.add(*buttons)
-    bot.send_message(message.chat.id, hint, reply_markup=markup)
+# ============================================================
+# ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+# ============================================================
+
+def generate_options(correct_word, all_words):
+    """
+    TODO: Сгенерировать 4 варианта ответа для викторины
+    Один вариант - правильный перевод, остальные - случайные слова из словаря
+    Если слов не хватает, можно добавить слова-заглушки
+    """
+    pass
 
 
-bot.add_custom_filter(custom_filters.StateFilter(bot))
+# ============================================================
+# ИНТЕРФЕЙС ПРИЛОЖЕНИЯ (НЕОБХОДИМО ДОРАБОТАТЬ)
+# ============================================================
 
-bot.infinity_polling(skip_pending=True)
+def render_sidebar():
+    """
+    TODO: Реализовать боковую панель с авторизацией
+    - Поле для ввода имени
+    - Кнопка входа
+    - Приветствие после входа
+    - Кнопка выхода
+    """
+    pass
+
+
+def render_study_tab(words):
+    """
+    TODO: Реализовать вкладку изучения слов
+    - Отображение текущего слова на русском
+    - 4 кнопки с вариантами перевода
+    - Обработка правильных/неправильных ответов
+    - Кнопка следующего слова
+    """
+    pass
+
+
+def render_add_word_tab():
+    """
+    TODO: Реализовать вкладку добавления слова
+    - Поле для ввода слова на русском
+    - Поле для ввода перевода
+    - Кнопка добавления
+    - Уведомление об успешном добавлении
+    """
+    pass
+
+
+def render_delete_word_tab(words):
+    """
+    TODO: Реализовать вкладку удаления слова
+    - Выпадающий список с персональными словами пользователя
+    - Кнопка удаления
+    - Подтверждение удаления
+    """
+    pass
+
+
+def render_statistics_tab(user_id):
+    """
+    TODO: Реализовать вкладку статистики (дополнительное требование)
+    - Количество изученных слов
+    - Количество попыток
+    - Процент правильных ответов
+    - История последних попыток
+    """
+    pass
+
+
+def render_schema():
+    """
+    TODO: Реализовать отображение схемы базы данных (дополнительное требование)
+    """
+    pass
+
+
+# ============================================================
+# ГЛАВНАЯ ФУНКЦИЯ
+# ============================================================
+
+def main():
+    """
+    Главная функция приложения
+    TODO: Реализовать основную логику:
+    1. Инициализация БД
+    2. Авторизация пользователя
+    3. Отображение вкладок с функционалом
+    4. Приветственное сообщение для неавторизованных пользователей
+    """
+    
+    st.title("📚 EnglishCard - Изучай английский с удовольствием!")
+    
+    # TODO: Инициализация состояния сессии
+    # st.session_state.user_id
+    # st.session_state.username
+    
+    # TODO: Инициализация БД
+    # init_database()
+    
+    # TODO: Боковая панель с авторизацией
+    # render_sidebar()
+    
+    # TODO: Основной контент в зависимости от авторизации
+    # if st.session_state.user_id:
+    #     words = get_user_words(st.session_state.user_id)
+    #     # Создание вкладок
+    #     tab1, tab2, tab3, tab4 = st.tabs(["📖 Изучение", "➕ Добавить слово", "🗑️ Удалить слово", "📊 Статистика"])
+    #     with tab1:
+    #         render_study_tab(words)
+    #     # ... остальные вкладки
+    # else:
+    #     # Приветственное сообщение
+    #     pass
+
+
+if __name__ == "__main__":
+    main()
