@@ -75,7 +75,7 @@
 В качестве примера интерфейса приложения можете воспользоваться следующим референсом:
 
 <div align="center">
-  <img src="https://github.com/netology-code/sqlpy-diplom/blob/main/Screenshot.png" width="400" alt="Примерный дизайн приложения"/>
+  <img src="https://github.com/netology-code/sqlpy-diplom/blob/sqlpy-148/Screenshot.png" width="400" alt="Примерный дизайн приложения"/>
   <p>возможный интерфейс приложения</p>
 </div>
 
