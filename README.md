@@ -37,7 +37,7 @@
 2. [Git](https://git-scm.com/) + [GitHub](https://github.com/).
 3. [Postgre](https://www.postgresql.org/) + [PgAdmin](https://www.pgadmin.org/).
 4. [Streamlit](https://streamlit.io/) - фреймворк для создания веб-приложений на Python.
-5. [Репозиторий Streamlit](https://github.com/streamlit)
+5. [Репозиторий Streamlit](https://github.com/streamlit/streamlit)
 6. [psycopg2](https://pypi.org/project/psycopg2-binary/) - для работы с PostgreSQL.
 7. Основа приложения - код из модуля [main.py](https://github.com/netology-code/sqlpy-diplom/blob/sqlpy-148/main.py).
 8. Исходный код в модуле main.py работает. Чтобы запустить приложение, выполните: `streamlit run main.py`
